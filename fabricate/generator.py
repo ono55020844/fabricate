@@ -58,6 +58,38 @@ class CodeGenerator:
         )
         return response.content[0].text
     
+    def _extract_json(self, response: str) -> dict:
+        """Extract JSON from Claude's response, handling various formats."""
+        if not response or not response.strip():
+            raise ValueError("Empty response")
+        
+        text = response.strip()
+        
+        # Try to find JSON in code blocks
+        if "```" in text:
+            parts = text.split("```")
+            for part in parts:
+                part = part.strip()
+                if part.startswith("json"):
+                    part = part[4:].strip()
+                if part.startswith("{"):
+                    try:
+                        return json.loads(part)
+                    except json.JSONDecodeError:
+                        continue
+        
+        # Try to find raw JSON object
+        start = text.find("{")
+        end = text.rfind("}") + 1
+        if start != -1 and end > start:
+            try:
+                return json.loads(text[start:end])
+            except json.JSONDecodeError:
+                pass
+        
+        # Last resort: try parsing the whole thing
+        return json.loads(text)
+    
     def generate_repo_concept(
         self,
         language: str,
@@ -75,6 +107,13 @@ class CodeGenerator:
         lang_config = LANGUAGE_CONFIGS.get(language, LANGUAGE_CONFIGS["python"])
         complexity_profile = COMPLEXITY_PROFILES[complexity]
         
+        # Randomly choose name length for variety
+        name_length = random.choice(["one word (e.g., 'rustler', 'beacon', 'flux')", 
+                                      "two words (e.g., 'quick-sync', 'data-forge')", 
+                                      "one word (e.g., 'envoy', 'spark', 'nexus')",
+                                      "two words (e.g., 'code-pulse', 'api-kit')",
+                                      "three words (e.g., 'fast-api-router')"])
+        
         system = """You are a creative developer who comes up with unique, interesting project ideas.
 You respond ONLY with valid JSON, no markdown formatting or explanation."""
 
@@ -83,6 +122,8 @@ You respond ONLY with valid JSON, no markdown formatting or explanation."""
 Category hint: {category}
 Complexity: {complexity_profile['description']}
 Name style: {name_style} (descriptive=clear purpose, quirky=fun/memorable, technical=formal/precise)
+
+IMPORTANT - Name should be {name_length}. Vary between short punchy names and longer descriptive ones.
 {existing_str}
 
 Respond with ONLY this JSON structure:
@@ -96,15 +137,9 @@ Respond with ONLY this JSON structure:
 
         response = self._call_claude(system, user, max_tokens=500)
         
-        # Parse JSON from response
         try:
-            # Try to extract JSON if wrapped in code blocks
-            if "```" in response:
-                response = response.split("```")[1]
-                if response.startswith("json"):
-                    response = response[4:]
-            return json.loads(response.strip())
-        except json.JSONDecodeError:
+            return self._extract_json(response)
+        except (json.JSONDecodeError, ValueError):
             # Fallback concept
             return {
                 "name": f"{language}-{category}-{random.randint(100, 999)}",
@@ -170,11 +205,10 @@ IMPORTANT:
         response = self._call_claude(system, user, max_tokens=8000)
         
         try:
-            if "```" in response:
-                response = response.split("```")[1]
-                if response.startswith("json"):
-                    response = response[4:]
-            data = json.loads(response.strip())
+            data = self._extract_json(response)
+            
+            if not data or "files" not in data:
+                raise ValueError("No valid files in response")
             
             files = [
                 GeneratedFile(
@@ -186,13 +220,12 @@ IMPORTANT:
             ]
             
             return GeneratedCommit(
-                message=data["commit_message"],
+                message=data.get("commit_message", "Initial commit"),
                 files=files,
                 description="Initial project structure"
             )
-        except (json.JSONDecodeError, KeyError) as e:
-            console.print(f"[yellow]Warning: Failed to parse initial commit response: {e}[/yellow]")
-            # Return minimal fallback
+        except (json.JSONDecodeError, KeyError, ValueError) as e:
+            console.print(f"[yellow]Warning: Using fallback for initial commit ({e})[/yellow]")
             return self._generate_fallback_initial_commit(repo_concept, language, lang_config)
     
     def _generate_fallback_initial_commit(
@@ -321,11 +354,10 @@ IMPORTANT:
         response = self._call_claude(system, user, max_tokens=6000)
         
         try:
-            if "```" in response:
-                response = response.split("```")[1]
-                if response.startswith("json"):
-                    response = response[4:]
-            data = json.loads(response.strip())
+            data = self._extract_json(response)
+            
+            if not data or "files" not in data:
+                raise ValueError("No valid files in response")
             
             files = [
                 GeneratedFile(
@@ -337,12 +369,12 @@ IMPORTANT:
             ]
             
             return GeneratedCommit(
-                message=data["commit_message"],
+                message=data.get("commit_message", f"{commit_type}: update project"),
                 files=files,
                 description=f"Commit {commit_number}: {commit_type}"
             )
-        except (json.JSONDecodeError, KeyError) as e:
-            console.print(f"[yellow]Warning: Failed to parse commit response: {e}[/yellow]")
+        except (json.JSONDecodeError, KeyError, ValueError) as e:
+            console.print(f"[yellow]Warning: Using fallback for commit {commit_number} ({e})[/yellow]")
             return GeneratedCommit(
                 message=f"{commit_type}: update project",
                 files=[
