@@ -158,7 +158,11 @@ Respond with ONLY this JSON:
 }}
 
 IMPORTANT:
-- Include a README.md
+- Include a high-quality README.md that is concise but informative:
+  * Brief description of what the project does (1-2 sentences)
+  * Installation instructions (how to install dependencies)
+  * Usage examples (how to run the app with example commands)
+  * Keep it under 80 lines - no fluff or excessive badges
 - Include appropriate config files for {language}
 - Make the code realistic and functional
 - Use proper formatting and indentation (use \\n for newlines, \\t for tabs)"""
@@ -198,10 +202,51 @@ IMPORTANT:
         lang_config: dict
     ) -> GeneratedCommit:
         """Generate a minimal fallback initial commit."""
+        
+        # Build a proper README
+        install_cmd = {
+            "python": "pip install -r requirements.txt",
+            "javascript": "npm install",
+            "typescript": "npm install",
+            "rust": "cargo build",
+            "go": "go mod download",
+            "ruby": "bundle install",
+        }.get(language, "See documentation")
+        
+        run_cmd = {
+            "python": "python main.py",
+            "javascript": "node index.js",
+            "typescript": "npx ts-node src/index.ts",
+            "rust": "cargo run",
+            "go": "go run .",
+            "ruby": "ruby main.rb",
+        }.get(language, "./run")
+        
+        readme_content = f"""# {repo_concept['name']}
+
+{repo_concept['description']}
+
+## Installation
+
+```bash
+{install_cmd}
+```
+
+## Usage
+
+```bash
+{run_cmd}
+```
+
+## Features
+
+{chr(10).join(f'- {feat}' for feat in repo_concept.get('main_features', ['Core functionality']))}
+"""
+        
         files = [
             GeneratedFile(
                 path="README.md",
-                content=f"# {repo_concept['name']}\n\n{repo_concept['description']}\n",
+                content=readme_content,
                 description="Project readme"
             )
         ]
