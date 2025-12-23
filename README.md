@@ -104,6 +104,37 @@ Options:
   --dry-run                    Show what would be created
 ```
 
+### Technologies (`-t, --tech`)
+
+The `-t` flag lets you specify technologies, libraries, or tools that generated projects should use. Pass any technology you want — there's no predefined list.
+
+```bash
+# Frontend stack
+fabricate generate -l nextjs -t tailwind -t shadcn -t framer-motion
+
+# Backend with databases
+fabricate generate -l python -t fastapi -t postgres -t redis -t docker
+
+# Full-stack with auth and payments  
+fabricate generate -l nextjs -t supabase -t clerk -t stripe
+```
+
+### Categories (`-c, --category`)
+
+The `-c` flag lets you specify what type of project to build. Pass any description — it's free-form text that guides the AI.
+
+```bash
+# Specific project types
+fabricate generate -l rust -c cli_tool -c automation
+fabricate generate -l nextjs -c saas -c dashboard
+
+# Descriptive categories work too
+fabricate generate -l python -c "data pipeline for ETL"
+fabricate generate -l nextjs -c "e-commerce marketplace" -c "booking platform"
+```
+
+If neither flag is set, the generator picks randomly from defaults.
+
 ### Other Commands
 
 ```bash
